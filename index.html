@@ -3,11 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Jeson Joshua</title>
-<meta name="description" content="Jeson Joshua - finance, procurement and data. Projects and write-ups.">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<meta name="description" content="A two-minute walkthrough of an invoice control agent that checks supplier invoices against each supplier's contract. Built by Jeson Joshua.">
+<meta property="og:title" content="Invoice Control Agent">
+<meta property="og:description" content="Supplier invoices checked against each supplier's own contract - prices, payment terms, VAT, duplicates - before anyone looks at them.">
+<meta property="og:image" content="poster.jpg">
+<meta property="og:type" content="website">
 <style>
   *,*::before,*::after{box-sizing:border-box}
+  html{color-scheme:light}
+  body{margin:0;font-size:14px}
+  img{max-width:100%}
+</style>
+<title>Invoice Control Agent</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Single reading column; a ledger rule separates each stage of the pipeline. */
   :root {
     --bg: #F5F7F3;
     --surface: #FFFFFF;
@@ -15,23 +25,34 @@
     --muted: #5B6659;
     --accent: #1F5C45;
     --line: #DCE2D7;
+    --warn: #8A6A1F;
     --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-    --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
-    color-scheme: light;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
   }
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --bg: #0F120F;
       --surface: #171C17;
       --fg: #E7ECE5;
       --muted: #97A294;
       --accent: #6FBE99;
       --line: #28302A;
+      --warn: #D4AC5A;
       color-scheme: dark;
     }
   }
+  :root[data-theme="dark"] {
+    --bg: #0F120F;
+    --surface: #171C17;
+    --fg: #E7ECE5;
+    --muted: #97A294;
+    --accent: #6FBE99;
+    --line: #28302A;
+    --warn: #D4AC5A;
+    color-scheme: dark;
+  }
+
   body {
-    margin: 0;
     background: var(--bg);
     color: var(--fg);
     font-family: var(--font-sans);
@@ -40,73 +61,225 @@
     -webkit-font-smoothing: antialiased;
   }
   .wrap {
-    max-width: 42rem;
+    max-width: 50rem;
     margin: 0 auto;
     padding-left: max(16px, env(safe-area-inset-left, 0px));
     padding-right: max(16px, env(safe-area-inset-right, 0px));
-    padding-block: 4.5rem 4rem;
+    padding-block: 3rem 4rem;
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
+    gap: 2.75rem;
   }
-  h1 { font-size: clamp(1.9rem, 5vw, 2.5rem); letter-spacing: -0.02em; margin: 0; }
-  .lede { color: var(--muted); margin: 0.7rem 0 0; max-width: 34rem; }
+
   .eyebrow {
     font-family: var(--font-mono);
     font-size: 0.72rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--accent);
-    margin: 0 0 1rem;
+    margin: 0;
   }
-  ul.projects { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
-  ul.projects li { border-bottom: 1px solid var(--line); }
-  ul.projects a {
-    display: block;
-    padding: 1.1rem 0;
-    text-decoration: none;
-    color: inherit;
+  h1 {
+    font-size: clamp(2rem, 6vw, 2.9rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0.5rem 0 0;
   }
-  ul.projects a:hover .ptitle { color: var(--accent); }
-  .ptitle { font-weight: 600; }
-  .pdesc { color: var(--muted); font-size: 0.95rem; margin-top: 0.15rem; }
-  .pmeta {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
+  .lede {
+    font-size: 1.125rem;
     color: var(--muted);
-    letter-spacing: 0.04em;
-    margin-top: 0.4rem;
+    margin: 0.85rem 0 0;
+    max-width: 38rem;
   }
-  footer { font-size: 0.88rem; color: var(--muted); }
+  .byline {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 1.25rem 0 0;
+  }
+  .byline a { color: var(--accent); }
+
+  video {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  figure { margin: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+  figcaption { font-size: 0.85rem; color: var(--muted); }
+
+  h2 {
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.9rem;
+  }
+  section { margin: 0; }
+  section p { margin: 0 0 0.9rem; max-width: 38rem; }
+  section p:last-child { margin-bottom: 0; }
+
+  ol.steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  ol.steps li {
+    display: grid;
+    grid-template-columns: 2.4rem 1fr;
+    gap: 0 1rem;
+    padding: 0.95rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .num {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    padding-top: 0.22rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .step-title { font-weight: 600; }
+  .step-body { color: var(--muted); font-size: 0.95rem; }
+  .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 0.08rem 0.36rem;
+    margin-left: 0.45rem;
+    vertical-align: 0.1em;
+  }
+
+  .notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+  .notes li { padding-left: 1.35rem; position: relative; color: var(--muted); max-width: 38rem; }
+  .notes li::before { content: "—"; position: absolute; left: 0; color: var(--accent); }
+  .notes strong { color: var(--fg); font-weight: 600; }
+
+  .stack { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 3px;
+    padding: 0.22rem 0.5rem;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding-top: 1.25rem;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+  footer p { margin: 0 0 0.5rem; max-width: 38rem; }
   footer a { color: var(--accent); }
-  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 </style>
+
 </head>
 <body>
 <div class="wrap">
 
   <header>
-    <h1>Jeson Joshua</h1>
-    <p class="lede">Finance, procurement and data, in Copenhagen. Things I have built, with the reasoning behind them.</p>
+    <p class="eyebrow">Personal project · Copenhagen</p>
+    <h1>Invoice Control Agent</h1>
+    <p class="lede">Supplier invoices arrive by email and get checked against each supplier's own contract — prices, payment terms, VAT, duplicates — before anyone looks at them.</p>
+    <p class="byline">Jeson Joshua · <a href="https://linkedin.com/in/jj-200987j">linkedin.com/in/jj-200987j</a></p>
   </header>
 
+  <figure>
+    <video controls preload="metadata" poster="poster.jpg" playsinline>
+      <source src="invoice-control-agent.mp4" type="video/mp4">
+      Your browser cannot play this video.
+    </video>
+    <figcaption>Two-minute walkthrough. No sound needed.</figcaption>
+  </figure>
+
   <section>
-    <p class="eyebrow">Projects</p>
-    <ul class="projects">
+    <h2>The idea</h2>
+    <p>Invoice control is usually either a person reading PDFs, or a rules engine nobody can explain. This splits the work: the language model reads documents and explains what it found, deterministic code does every check and every calculation, and a person decides what to do about the exceptions.</p>
+    <p>Six steps, two kinds of intelligence.</p>
+  </section>
+
+  <section>
+    <ol class="steps">
       <li>
-        <a href="invoice-agent/">
-          <div class="ptitle">Invoice Control Agent</div>
-          <div class="pdesc">Supplier invoices checked against each supplier's own contract — prices, payment terms, VAT, duplicates — before anyone looks at them.</div>
-          <div class="pmeta">Python · Claude API · Power Automate · 2 min video</div>
-        </a>
+        <span class="num">01</span>
+        <span>
+          <span class="step-title">An invoice arrives by email</span><span class="tag">Real input</span>
+          <div class="step-body">PDF or e-invoice XML, in whatever layout the supplier sends.</div>
+        </span>
       </li>
+      <li>
+        <span class="num">02</span>
+        <span>
+          <span class="step-title">Power Automate saves every attachment</span><span class="tag">Flow</span>
+          <div class="step-body">Straight into OneDrive, timestamped, so a re-sent invoice becomes a new file the checks can catch rather than a silent overwrite.</div>
+        </span>
+      </li>
+      <li>
+        <span class="num">03</span>
+        <span>
+          <span class="step-title">Each PDF is read into structured data</span><span class="tag">AI</span>
+          <div class="step-body">Any layout, Danish or English, into a fixed schema. Net plus VAT must equal the total and the line items must equal the net, so a misread is caught instead of hidden.</div>
+        </span>
+      </li>
+      <li>
+        <span class="num">04</span>
+        <span>
+          <span class="step-title">Each supplier's MSA becomes exact rules</span><span class="tag">AI</span>
+          <div class="step-body">Agreed prices, payment terms, duplicate handling and scope, lifted out of the contract into a terms file the checks can read.</div>
+        </span>
+      </li>
+      <li>
+        <span class="num">05</span>
+        <span>
+          <span class="step-title">Every invoice is checked against its own contract</span><span class="tag">Rules</span>
+          <div class="step-body">Prices, payment terms, VAT, currency, duplicates, price changes, anomalies and scope. Each finding carries a severity and a recommended action; clean invoices are marked clean and left alone.</div>
+        </span>
+      </li>
+      <li>
+        <span class="num">06</span>
+        <span>
+          <span class="step-title">Ask in plain language</span><span class="tag">AI + code</span>
+          <div class="step-body">"Which suppliers did not follow the payment terms in their MSA?" The model chooses the analysis; Python computes every number. The answer shows the tools it called, so each figure traces back to source data.</div>
+        </span>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>The parts I cared about</h2>
+    <ul class="notes">
+      <li><strong>No figure comes from the model.</strong> The model picks the analysis and writes the explanation. Every number is calculated in code from the source data. In finance that distinction is the whole thing.</li>
+      <li><strong>Completeness is its own control.</strong> Emails received, files saved, invoices read, invoices in the agent — reconciled end to end on one page, so anything that fell out shows up the same day rather than at year end.</li>
+      <li><strong>Only real exceptions surface.</strong> Severity and a recommended action on each one, exported as Excel and PDF. A list of everything is the same as no list.</li>
+      <li><strong>Guardrails are explicit.</strong> Schema-enforced outputs, automated validation, and safeguards that stop the agent recommending an action the underlying contract terms do not support.</li>
     </ul>
   </section>
 
+  <section>
+    <h2>Built with</h2>
+    <div class="stack">
+      <span class="chip">Python</span>
+      <span class="chip">Claude API</span>
+      <span class="chip">Power Automate</span>
+      <span class="chip">OneDrive / SharePoint</span>
+      <span class="chip">Excel &amp; PDF reporting</span>
+    </div>
+  </section>
+
   <footer>
-    <a href="https://linkedin.com/in/jj-200987j">linkedin.com/in/jj-200987j</a>
+    <p>Built as a personal project during a career break, to learn generative AI and agent tooling by making something that would have to survive a controller's questions. Every supplier, contract and invoice in the demo is invented.</p>
+    <p>Jeson Joshua · Copenhagen · <a href="https://linkedin.com/in/jj-200987j">linkedin.com/in/jj-200987j</a></p>
   </footer>
 
 </div>
+
 </body>
 </html>
