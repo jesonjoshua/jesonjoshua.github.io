@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="A two-minute walkthrough of an invoice control agent that checks supplier invoices against each supplier's contract. Built by Jeson Joshua.">
+<meta name="description" content="A one-minute walkthrough of an invoice control agent, now inside Microsoft Copilot, that checks supplier invoices against each supplier's contract. Built by Jeson Joshua.">
 <meta property="og:title" content="Invoice Control Agent">
 <meta property="og:description" content="Supplier invoices checked against each supplier's own contract - prices, payment terms, VAT, duplicates - before anyone looks at them.">
 <meta property="og:image" content="poster.jpg">
@@ -197,7 +197,7 @@
       <source src="invoice-control-agent.mp4" type="video/mp4">
       Your browser cannot play this video.
     </video>
-    <figcaption>Two-minute walkthrough. No sound needed.</figcaption>
+    <figcaption>One-minute walkthrough, ending in Microsoft Copilot. No sound needed.</figcaption>
   </figure>
 
   <section>
@@ -246,8 +246,8 @@
       <li>
         <span class="num">06</span>
         <span>
-          <span class="step-title">Ask in plain language</span><span class="tag">AI + code</span>
-          <div class="step-body">"Which suppliers did not follow the payment terms in their MSA?" The model chooses the analysis; Python computes every number. The answer shows the tools it called, so each figure traces back to source data.</div>
+          <span class="step-title">Ask in plain language, in Microsoft Copilot</span><span class="tag">AI + code</span>
+          <div class="step-body">"Which suppliers make up 80% of our spend?" Asked in a Copilot Studio agent, which calls the Python engine through a secure custom API. The model chooses the analysis; Python computes every number and draws the chart. The answer shows the tools it called, so each figure traces back to source data.</div>
         </span>
       </li>
     </ol>
@@ -260,6 +260,7 @@
       <li><strong>Completeness is its own control.</strong> Emails received, files saved, invoices read, invoices in the agent — reconciled end to end on one page, so anything that fell out shows up the same day rather than at year end.</li>
       <li><strong>Only real exceptions surface.</strong> Severity and a recommended action on each one, exported as Excel and PDF. A list of everything is the same as no list.</li>
       <li><strong>Guardrails are explicit.</strong> Schema-enforced outputs, automated validation, and safeguards that stop the agent recommending an action the underlying contract terms do not support.</li>
+      <li><strong>It meets people where they work.</strong> The same engine is exposed as an OpenAPI custom connector with an API key, so a Copilot Studio agent in Microsoft 365 gets exact totals, trends and Pareto analysis from code. Copilot handles the conversation; the numbers never come from the model.</li>
     </ul>
   </section>
 
