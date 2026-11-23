@@ -281,5 +281,17 @@
 
 </div>
 
-</body>
+<script data-goatcounter="https://jesonjoshua.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var v = document.querySelector('video'), sent = false;
+  if (!v) return;
+  v.addEventListener('play', function () {
+    if (sent || !window.goatcounter || !window.goatcounter.count) return;
+    sent = true;
+    window.goatcounter.count({ path: 'video-play', title: 'Video played', event: true });
+  });
+});
+</script></body>
 </html>
