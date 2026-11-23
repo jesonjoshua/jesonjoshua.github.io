@@ -280,6 +280,9 @@
   <footer>
     <p>Built as a personal project during a career break, to learn generative AI and agent tooling by making something that would have to survive a controller's questions. Every supplier, contract and invoice in the demo is invented.</p>
     <p>Jeson Joshua · Copenhagen · <a href="https://linkedin.com/in/jj-200987j">linkedin.com/in/jj-200987j</a></p>
+    <p id="gc-stats" style="opacity:.75;font-size:.9em" hidden>
+      <span id="gc-visits">0</span> visits · <span id="gc-plays">0</span> video plays
+    </p>
   </footer>
 
 </div>
@@ -296,5 +299,20 @@ document.addEventListener('DOMContentLoaded', function () {
     window.goatcounter.count({ path: 'video-play', title: 'Video played', event: true });
   });
 });
-</script></body>
+</script><script>
+// public visit counts from GoatCounter (anonymous, no cookies)
+(function () {
+  var base = 'https://jesonjoshua.goatcounter.com/counter/';
+  function get(path, id, done) {
+    fetch(base + encodeURIComponent(path) + '.json')
+      .then(function (r) { return r.ok ? r.json() : { count: '0' }; })
+      .then(function (d) { document.getElementById(id).textContent = d.count; done(); })
+      .catch(function () { document.getElementById(id).textContent = '0'; done(); });
+  }
+  var left = 2, show = function () { if (--left === 0) document.getElementById('gc-stats').hidden = false; };
+  get('/', 'gc-visits', show);
+  get('video-play', 'gc-plays', show);
+})();
+</script>
+</body>
 </html>
